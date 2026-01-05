@@ -6,9 +6,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var bluetoothManager: BluetoothManager?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        print("App launched!")
-        NSLog("App launched!")
-
         // Hide from Dock
         NSApp.setActivationPolicy(.accessory)
 
@@ -17,9 +14,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         // Initialize status item controller
         statusItemController = StatusItemController(bluetoothManager: bluetoothManager!)
-
-        print("Status item created")
-        NSLog("Status item created")
     }
 
     func applicationWillTerminate(_ notification: Notification) {

@@ -5,27 +5,20 @@ import Combine
 class StatusItemController: ObservableObject {
     private var statusItem: NSStatusItem!
     private var panel: NSPanel!
+    private var settingsWindow: NSWindow?
     private var bluetoothManager: BluetoothManager
     private var cancellables = Set<AnyCancellable>()
 
     init(bluetoothManager: BluetoothManager) {
         self.bluetoothManager = bluetoothManager
 
-        print("Creating status item...")
-
         // Create status item
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
 
-        print("Status item created: \(statusItem != nil)")
-
         if let button = statusItem.button {
-            print("Setting up button...")
             button.title = "Air Quality"
             button.action = #selector(togglePanel)
             button.target = self
-            print("Button title set to: \(button.title)")
-        } else {
-            print("ERROR: Status item button is nil!")
         }
 
         // Create borderless panel (no arrow/notch)
@@ -45,8 +38,13 @@ class StatusItemController: ObservableObject {
 
         // Use native material background
         let contentView = NSHostingView(
-            rootView: MenuBarView(bluetoothManager: bluetoothManager)
-                .background(VisualEffectView())
+            rootView: MenuBarView(
+                bluetoothManager: bluetoothManager,
+                onSettingsClicked: { [weak self] in
+                    self?.openSettings()
+                }
+            )
+            .background(VisualEffectView())
         )
         panel.contentView = contentView
 
@@ -142,6 +140,51 @@ class StatusItemController: ObservableObject {
 
     private func closePanel() {
         panel.orderOut(nil)
+    }
+
+    private func openSettings() {
+        // Close the main panel first
+        closePanel()
+
+        // If settings window already exists, just bring it to front
+        if let window = settingsWindow {
+            window.makeKeyAndOrderFront(nil)
+            NSApp.activate(ignoringOtherApps: true)
+            return
+        }
+
+        // Create new settings window
+        let settingsView = SettingsView(
+            bluetoothManager: bluetoothManager,
+            onClose: { [weak self] in
+                self?.settingsWindow?.close()
+            }
+        )
+        let hostingController = NSHostingController(rootView: settingsView)
+
+        let window = NSWindow(
+            contentRect: NSRect(x: 0, y: 0, width: 400, height: 235),
+            styleMask: [.titled, .closable],
+            backing: .buffered,
+            defer: false
+        )
+        window.title = "Aranet4 Settings"
+        window.contentViewController = hostingController
+        window.isReleasedWhenClosed = false
+        window.level = .floating
+
+        // Center on main screen
+        if let screen = NSScreen.main {
+            let screenFrame = screen.visibleFrame
+            let windowFrame = window.frame
+            let x = screenFrame.midX - windowFrame.width / 2
+            let y = screenFrame.midY - windowFrame.height / 2
+            window.setFrameOrigin(NSPoint(x: x, y: y))
+        }
+
+        settingsWindow = window
+        window.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
     }
 }
 

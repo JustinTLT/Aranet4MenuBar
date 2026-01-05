@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MenuBarView: View {
     @ObservedObject var bluetoothManager: BluetoothManager
+    var onSettingsClicked: (() -> Void)?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -11,6 +12,16 @@ struct MenuBarView: View {
                     .font(.headline)
                 Spacer()
                 ConnectionStatusView(status: bluetoothManager.connectionStatus)
+
+                Button(action: {
+                    openSettings()
+                }) {
+                    Image(systemName: "gear")
+                        .foregroundColor(.secondary)
+                        .imageScale(.medium)
+                }
+                .buttonStyle(.plain)
+                .help("Settings")
             }
             .padding(.bottom, 4)
 
@@ -68,16 +79,27 @@ struct MenuBarView: View {
                 .disabled(bluetoothManager.connectionStatus != .connected)
 
                 Button(action: {
-                    NSApplication.shared.terminate(nil)
+                    bluetoothManager.sendTestNotification()
                 }) {
                     HStack {
-                        Image(systemName: "xmark.circle")
-                        Text("Quit")
+                        Image(systemName: "bell")
+                        Text("Test Alert")
                     }
                     .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
             }
+
+            Button(action: {
+                NSApplication.shared.terminate(nil)
+            }) {
+                HStack {
+                    Image(systemName: "xmark.circle")
+                    Text("Quit")
+                }
+                .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.bordered)
         }
         .padding()
         .frame(width: 300)
@@ -95,6 +117,10 @@ struct MenuBarView: View {
             let hours = seconds / 3600
             return "\(hours) hour\(hours == 1 ? "" : "s") ago"
         }
+    }
+
+    private func openSettings() {
+        onSettingsClicked?()
     }
 }
 

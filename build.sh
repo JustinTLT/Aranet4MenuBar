@@ -32,6 +32,7 @@ swiftc \
     BluetoothManager.swift \
     StatusItemController.swift \
     MenuBarView.swift \
+    SettingsView.swift \
     AppDelegate.swift \
     main.swift
 
@@ -44,6 +45,17 @@ cp Info.plist "$APP_BUNDLE/Contents/"
 if [ -f "Aranet4.icns" ]; then
     cp Aranet4.icns "$APP_BUNDLE/Contents/Resources/"
     echo "Icon added"
+fi
+
+# Copy alert sounds
+if [ -f "air_quality_alert.aiff" ]; then
+    cp air_quality_alert.aiff "$APP_BUNDLE/Contents/Resources/"
+    echo "Gentle alert sound added"
+fi
+
+if [ -f "fire_alarm.aiff" ]; then
+    cp fire_alarm.aiff "$APP_BUNDLE/Contents/Resources/"
+    echo "Fire alarm sound added"
 fi
 
 # Create PkgInfo

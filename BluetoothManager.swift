@@ -2,19 +2,7 @@ import Foundation
 import CoreBluetooth
 import Combine
 import UserNotifications
-
-extension String {
-    func appendToFile(at url: URL) throws {
-        if FileManager.default.fileExists(atPath: url.path) {
-            let fileHandle = try FileHandle(forWritingTo: url)
-            fileHandle.seekToEndOfFile()
-            fileHandle.write(self.data(using: .utf8)!)
-            fileHandle.closeFile()
-        } else {
-            try self.write(to: url, atomically: true, encoding: .utf8)
-        }
-    }
-}
+import AppKit
 
 class BluetoothManager: NSObject, ObservableObject {
     // MARK: - Published Properties
@@ -35,22 +23,46 @@ class BluetoothManager: NSObject, ObservableObject {
     // Alert settings
     private var co2AlertThreshold: Int = 1200 // ppm
     private var hasAlertedForHighCO2: Bool = false
+    private var gentleAlertSound: NSSound?
+    private var urgentAlertSound: NSSound?
+
+    @Published var alertSoundType: AlertSoundType = .gentle {
+        didSet {
+            UserDefaults.standard.set(alertSoundType.rawValue, forKey: "alertSoundType")
+        }
+    }
 
     // MARK: - Initialization
 
     override init() {
         super.init()
+
+        // Load saved alert sound preference
+        if let savedType = UserDefaults.standard.string(forKey: "alertSoundType"),
+           let type = AlertSoundType(rawValue: savedType) {
+            alertSoundType = type
+        }
+
         centralManager = CBCentralManager(delegate: self, queue: nil)
         requestNotificationPermissions()
+        setupAlertSounds()
+    }
+
+    private func setupAlertSounds() {
+        // Load gentle alert sound
+        if let gentlePath = Bundle.main.path(forResource: "air_quality_alert", ofType: "aiff") {
+            gentleAlertSound = NSSound(contentsOfFile: gentlePath, byReference: false)
+        }
+
+        // Load urgent/fire alarm sound
+        if let urgentPath = Bundle.main.path(forResource: "fire_alarm", ofType: "aiff") {
+            urgentAlertSound = NSSound(contentsOfFile: urgentPath, byReference: false)
+        }
     }
 
     private func requestNotificationPermissions() {
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, error in
-            if granted {
-                NSLog("Notification permission granted")
-            } else if let error = error {
-                NSLog("Notification permission error: \(error.localizedDescription)")
-            }
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { _, _ in
+            // Permission requested
         }
     }
 
@@ -61,9 +73,79 @@ class BluetoothManager: NSObject, ObservableObject {
         content.sound = .default
 
         let request = UNNotificationRequest(identifier: "highCO2", content: content, trigger: nil)
-        UNUserNotificationCenter.current().add(request) { error in
-            if let error = error {
-                NSLog("Failed to send notification: \(error.localizedDescription)")
+        UNUserNotificationCenter.current().add(request)
+
+        // Play audio alarm - 3 beeps with pauses
+        playAlarmSound()
+    }
+
+    private func playAlarmSound() {
+        switch alertSoundType {
+        case .off:
+            // No sound
+            return
+
+        case .gentle:
+            // Play gentle sound 2 times
+            guard let sound = gentleAlertSound else { return }
+            for i in 0..<2 {
+                DispatchQueue.main.asyncAfter(deadline: .now() + Double(i) * 1.6) {
+                    sound.play()
+                }
+            }
+
+        case .urgent:
+            // Play fire alarm once (it's already 5 seconds long)
+            urgentAlertSound?.play()
+        }
+    }
+
+    func sendTestNotification() {
+        // Check notification authorization status first
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            DispatchQueue.main.async {
+                switch settings.authorizationStatus {
+                case .authorized, .provisional:
+                    // Permission granted, send notification
+                    let content = UNMutableNotificationContent()
+                    content.title = "Test Notification"
+                    content.body = "Notifications and alarm sound are working! You'll be alerted when CO2 reaches 1200 ppm."
+                    content.sound = .default
+
+                    let request = UNNotificationRequest(identifier: "test", content: content, trigger: nil)
+                    UNUserNotificationCenter.current().add(request)
+
+                    // Also play the alarm sound so user can hear it
+                    self.playAlarmSound()
+
+                case .denied:
+                    // Permission denied - show alert
+                    let alert = NSAlert()
+                    alert.messageText = "Notifications Disabled"
+                    alert.informativeText = "Please enable notifications for Aranet4 in System Settings → Notifications to receive CO2 alerts."
+                    alert.alertStyle = .warning
+                    alert.addButton(withTitle: "Open System Settings")
+                    alert.addButton(withTitle: "Cancel")
+
+                    if alert.runModal() == .alertFirstButtonReturn {
+                        // Open System Settings to Notifications
+                        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.notifications") {
+                            NSWorkspace.shared.open(url)
+                        }
+                    }
+
+                case .notDetermined:
+                    // Permission not yet requested - request it now
+                    UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound]) { granted, _ in
+                        if granted {
+                            // Send test notification after granting
+                            self.sendTestNotification()
+                        }
+                    }
+
+                @unknown default:
+                    break
+                }
             }
         }
     }
@@ -88,13 +170,10 @@ class BluetoothManager: NSObject, ObservableObject {
             withServices: serviceUUIDs,
             options: [CBCentralManagerScanOptionAllowDuplicatesKey: false]
         )
-
-        print("Scanning for Aranet4 devices...")
     }
 
     func stopScanning() {
         centralManager.stopScan()
-        print("Stopped scanning")
     }
 
     func refreshReadings() {
@@ -104,7 +183,6 @@ class BluetoothManager: NSObject, ObservableObject {
             return
         }
 
-        print("Refreshing readings...")
         peripheral.readValue(for: characteristic)
     }
 
@@ -136,7 +214,6 @@ extension BluetoothManager: CBCentralManagerDelegate {
     func centralManagerDidUpdateState(_ central: CBCentralManager) {
         switch central.state {
         case .poweredOn:
-            print("Bluetooth is powered on")
             startScanning()
         case .poweredOff:
             connectionStatus = .disconnected
@@ -153,8 +230,6 @@ extension BluetoothManager: CBCentralManagerDelegate {
     }
 
     func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
-        print("Discovered Aranet4: \(peripheral.name ?? "Unknown")")
-
         // Auto-connect to first Aranet4 found
         aranet4Peripheral = peripheral
         aranet4Peripheral?.delegate = self
@@ -165,7 +240,6 @@ extension BluetoothManager: CBCentralManagerDelegate {
     }
 
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
-        print("Connected to \(peripheral.name ?? "Aranet4")")
         connectionStatus = .connected
         errorMessage = nil
 
@@ -178,7 +252,6 @@ extension BluetoothManager: CBCentralManagerDelegate {
     }
 
     func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
-        print("Failed to connect: \(error?.localizedDescription ?? "Unknown error")")
         connectionStatus = .disconnected
         errorMessage = "Failed to connect to device"
         aranet4Peripheral = nil
@@ -190,7 +263,6 @@ extension BluetoothManager: CBCentralManagerDelegate {
     }
 
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
-        print("Disconnected from device")
         connectionStatus = .disconnected
         aranet4Peripheral = nil
         currentReadingsCharacteristic = nil
@@ -207,38 +279,26 @@ extension BluetoothManager: CBCentralManagerDelegate {
 
 extension BluetoothManager: CBPeripheralDelegate {
     func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
-        guard error == nil else {
-            print("Error discovering services: \(error!.localizedDescription)")
-            return
-        }
-
+        guard error == nil else { return }
         guard let services = peripheral.services else { return }
 
         for service in services {
-            print("Discovered service: \(service.uuid)")
             let characteristicUUID = CBUUID(string: Aranet4UUIDs.currentReadingsUUID)
             peripheral.discoverCharacteristics([characteristicUUID], for: service)
         }
     }
 
     func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
-        guard error == nil else {
-            print("Error discovering characteristics: \(error!.localizedDescription)")
-            return
-        }
-
+        guard error == nil else { return }
         guard let characteristics = service.characteristics else { return }
 
         for characteristic in characteristics {
-            print("Discovered characteristic: \(characteristic.uuid)")
-
             // Try both current readings characteristics
             let currentUUID = CBUUID(string: Aranet4UUIDs.currentReadingsUUID)
             let detailedUUID = CBUUID(string: Aranet4UUIDs.currentReadingsDetailedUUID)
 
             if characteristic.uuid == currentUUID || characteristic.uuid == detailedUUID {
                 currentReadingsCharacteristic = characteristic
-                NSLog("Using characteristic: \(characteristic.uuid.uuidString)")
                 // Read initial value
                 peripheral.readValue(for: characteristic)
                 // Start auto-refresh timer
@@ -249,30 +309,11 @@ extension BluetoothManager: CBPeripheralDelegate {
 
     func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
         guard error == nil else {
-            let errMsg = "Error reading characteristic: \(error!.localizedDescription)"
-            print(errMsg)
-            NSLog(errMsg)
             errorMessage = "Failed to read sensor data"
             return
         }
 
-        guard let data = characteristic.value else {
-            let msg = "No data received from characteristic"
-            print(msg)
-            NSLog(msg)
-            return
-        }
-
-        let hexString = data.map { String(format: "%02x", $0) }.joined(separator: " ")
-        let msg = "Received data: \(data.count) bytes - \(hexString)"
-        print(msg)
-        NSLog(msg)
-
-        // Write to debug file
-        let debugFile = FileManager.default.homeDirectoryForCurrentUser
-            .appendingPathComponent("aranet4_debug.txt")
-        let debugMsg = "\(Date()): \(data.count) bytes - \(hexString)\n"
-        try? debugMsg.appendToFile(at: debugFile)
+        guard let data = characteristic.value else { return }
 
         // Decode the reading
         if let reading = Aranet4Reading.decode(from: data) {
@@ -280,17 +321,11 @@ extension BluetoothManager: CBPeripheralDelegate {
                 self.currentReading = reading
                 self.lastUpdated = Date()
                 self.errorMessage = nil
-                let successMsg = "CO2: \(reading.co2) ppm, Temp: \(reading.temperature)°C, Humidity: \(reading.humidity)%, Pressure: \(reading.pressure) hPa, Battery: \(reading.battery)%"
-                print(successMsg)
-                NSLog(successMsg)
 
                 // Check for high CO2 and send alert
                 self.checkCO2Level(reading.co2)
             }
         } else {
-            let errMsg = "Failed to decode reading from \(data.count) bytes"
-            print(errMsg)
-            NSLog(errMsg)
             errorMessage = "Failed to decode sensor data"
         }
     }

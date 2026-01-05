@@ -11,7 +11,10 @@ A native macOS menu bar application that displays real-time air quality readings
 - **Auto-refresh** - Updates readings every 5 minutes
 - **Color-coded alerts** - Red text when CO2 reaches critical levels (≥1200 ppm)
 - **System notifications** - Get alerted when air quality degrades
+- **Customizable alert sounds** - Choose from gentle beeps, urgent fire alarm, or silence
+- **Audio alarms** - Optional sound alerts when CO2 levels get high
 - **Complete data** - View CO2, temperature, humidity, pressure, and battery level
+- **Settings window** - Easy-to-use native macOS settings interface
 - **Lightweight** - Native Swift app, minimal resource usage
 - **Privacy-focused** - All data stays on your device, no internet required
 
@@ -23,14 +26,7 @@ A native macOS menu bar application that displays real-time air quality readings
 
 ## Installation
 
-### Homebrew (Recommended)
-
-```bash
-brew tap robjama/aranet4 https://github.com/robjama/Aranet4MenuBar
-brew install --cask aranet4
-```
-
-### Direct Download
+### Direct Download (Recommended)
 
 [**Download Aranet4.app**](https://github.com/robjama/Aranet4MenuBar/releases/latest)
 
@@ -39,6 +35,13 @@ brew install --cask aranet4
 3. Drag **Aranet4.app** to your Applications folder
 4. Right-click and select "Open" (first time only, to bypass Gatekeeper)
 5. Grant Bluetooth and Notification permissions when prompted
+
+### Homebrew (via custom tap)
+
+```bash
+brew tap robjama/aranet4 https://github.com/robjama/Aranet4MenuBar
+brew install --cask aranet4
+```
 
 ### Build from Source
 
@@ -102,6 +105,7 @@ This will attempt to compile the app using swiftc.
 4. Once connected, it will display your air quality data
 5. Click the menu bar item to see detailed readings
 6. Use the Refresh button to manually update readings
+7. Click the gear icon to access settings and customize alert sounds
 
 ## FAQ
 
@@ -163,12 +167,14 @@ Data format: CO2 (u16LE), Temperature (u16LE), Pressure (u16LE), Humidity (u8), 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
 ### Ideas for Contributions
-- [ ] Add historical data graph
+- [ ] Historical data graph (24-hour/7-day CO2 trends)
 - [ ] Support for multiple Aranet4 devices
 - [ ] Export data to CSV
-- [ ] Custom alert thresholds
+- [ ] Custom CO2 alert thresholds
 - [ ] Menu bar icon customization
 - [ ] Temperature unit preference (°C/°F)
+- [ ] Launch at login option
+- [ ] Configurable refresh interval
 
 ## Acknowledgments
 

@@ -31,37 +31,30 @@ struct Aranet4Reading {
     // Decode from Aranet4 current readings characteristic (f0cd1503-95da-4f4b-9ac8-aa55d312af0c)
     // Data format: CO2(u16LE), Temperature(u16LE), Pressure(u16LE), Humidity(u8), Battery(u8), Status(u8), Interval(u16LE), Ago(u16LE)
     static func decode(from data: Data) -> Aranet4Reading? {
-        NSLog("Decoding \(data.count) bytes")
-
         // Try 7-byte format first (basic reading without interval/ago)
-        if data.count >= 7 {
-            let co2 = Int(data[0]) | (Int(data[1]) << 8)
-            let tempRaw = Int(data[2]) | (Int(data[3]) << 8)
-            let pressureRaw = Int(data[4]) | (Int(data[5]) << 8)
-            let humidity = Int(data[6])
+        guard data.count >= 7 else { return nil }
 
-            // Try to get battery if available
-            let battery = data.count >= 8 ? Int(data[7]) : 100
+        let co2 = Int(data[0]) | (Int(data[1]) << 8)
+        let tempRaw = Int(data[2]) | (Int(data[3]) << 8)
+        let pressureRaw = Int(data[4]) | (Int(data[5]) << 8)
+        let humidity = Int(data[6])
 
-            // Convert temperature: divide by 20 to get Celsius (0.05 multiplier)
-            let temperature = Double(tempRaw) / 20.0
+        // Try to get battery if available
+        let battery = data.count >= 8 ? Int(data[7]) : 100
 
-            // Convert pressure: divide by 10 to get hPa (0.1 multiplier)
-            let pressure = Double(pressureRaw) / 10.0
+        // Convert temperature: divide by 20 to get Celsius (0.05 multiplier)
+        let temperature = Double(tempRaw) / 20.0
 
-            NSLog("Decoded: CO2=\(co2), Temp=\(temperature), Press=\(pressure), Hum=\(humidity), Batt=\(battery)")
+        // Convert pressure: divide by 10 to get hPa (0.1 multiplier)
+        let pressure = Double(pressureRaw) / 10.0
 
-            return Aranet4Reading(
-                co2: co2,
-                temperature: temperature,
-                pressure: pressure,
-                humidity: humidity,
-                battery: battery
-            )
-        }
-
-        NSLog("Data too small: \(data.count) bytes")
-        return nil
+        return Aranet4Reading(
+            co2: co2,
+            temperature: temperature,
+            pressure: pressure,
+            humidity: humidity,
+            battery: battery
+        )
     }
 
     // Format for menu bar display
@@ -94,6 +87,18 @@ enum CO2Level {
         case .moderate: return "🟡"
         case .poor: return "🔴"
         }
+    }
+}
+
+// MARK: - Alert Sound Type
+
+enum AlertSoundType: String, CaseIterable {
+    case off = "Off"
+    case gentle = "Gentle"
+    case urgent = "Urgent (Fire Alarm)"
+
+    var displayName: String {
+        return self.rawValue
     }
 }
 
