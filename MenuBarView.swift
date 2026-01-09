@@ -31,7 +31,7 @@ struct MenuBarView: View {
             if let reading = bluetoothManager.currentReading {
                 ReadingsView(reading: reading)
             } else {
-                Text("No data available")
+                Text("Device not in range")
                     .foregroundColor(.secondary)
                     .frame(maxWidth: .infinity, alignment: .center)
                     .padding()
@@ -67,16 +67,20 @@ struct MenuBarView: View {
             // Actions
             HStack(spacing: 12) {
                 Button(action: {
-                    bluetoothManager.refreshReadings()
+                    if bluetoothManager.connectionStatus == .connected {
+                        bluetoothManager.refreshReadings()
+                    } else {
+                        bluetoothManager.startScanning()
+                    }
                 }) {
                     HStack {
-                        Image(systemName: "arrow.clockwise")
-                        Text("Refresh")
+                        Image(systemName: bluetoothManager.connectionStatus == .connected ? "arrow.clockwise" : "magnifyingglass")
+                        Text(bluetoothManager.connectionStatus == .connected ? "Refresh" : "Scan")
                     }
                     .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
-                .disabled(bluetoothManager.connectionStatus != .connected)
+                .disabled(bluetoothManager.connectionStatus == .scanning || bluetoothManager.connectionStatus == .connecting)
 
                 Button(action: {
                     bluetoothManager.sendTestNotification()
@@ -239,6 +243,8 @@ struct ConnectionStatusView: View {
             return .orange
         case .connected:
             return .green
+        case .notFound:
+            return .gray
         }
     }
 
@@ -252,6 +258,8 @@ struct ConnectionStatusView: View {
             return "Connecting"
         case .connected:
             return "Connected"
+        case .notFound:
+            return "Not in Range"
         }
     }
 }

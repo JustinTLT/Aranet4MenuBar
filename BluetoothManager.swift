@@ -18,7 +18,11 @@ class BluetoothManager: NSObject, ObservableObject {
     private var aranet4Peripheral: CBPeripheral?
     private var currentReadingsCharacteristic: CBCharacteristic?
     private var refreshTimer: Timer?
+    private var scanTimeoutTimer: Timer?
+    private var retryTimer: Timer?
     private var autoRefreshInterval: TimeInterval = 300 // 5 minutes
+    private var scanTimeout: TimeInterval = 30 // 30 seconds
+    private var retryInterval: TimeInterval = 300 // 5 minutes - retry scanning when device not found
 
     // Alert settings
     private var co2AlertThreshold: Int = 1200 // ppm
@@ -170,10 +174,14 @@ class BluetoothManager: NSObject, ObservableObject {
             withServices: serviceUUIDs,
             options: [CBCentralManagerScanOptionAllowDuplicatesKey: false]
         )
+
+        // Start scan timeout timer
+        startScanTimeoutTimer()
     }
 
     func stopScanning() {
         centralManager.stopScan()
+        stopScanTimeoutTimer()
     }
 
     func refreshReadings() {
@@ -191,6 +199,7 @@ class BluetoothManager: NSObject, ObservableObject {
             centralManager.cancelPeripheralConnection(peripheral)
         }
         stopRefreshTimer()
+        stopRetryTimer()
     }
 
     // MARK: - Private Methods
@@ -205,6 +214,48 @@ class BluetoothManager: NSObject, ObservableObject {
     private func stopRefreshTimer() {
         refreshTimer?.invalidate()
         refreshTimer = nil
+    }
+
+    private func startScanTimeoutTimer() {
+        stopScanTimeoutTimer()
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.scanTimeoutTimer = Timer.scheduledTimer(withTimeInterval: self.scanTimeout, repeats: false) { [weak self] _ in
+                self?.handleScanTimeout()
+            }
+        }
+    }
+
+    private func stopScanTimeoutTimer() {
+        scanTimeoutTimer?.invalidate()
+        scanTimeoutTimer = nil
+    }
+
+    private func handleScanTimeout() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            // Stop scanning and update status
+            self.centralManager.stopScan()
+            self.connectionStatus = .notFound
+            self.errorMessage = nil  // Clear error message, status indicator is enough
+            // Start periodic retry timer
+            self.startRetryTimer()
+        }
+    }
+
+    private func startRetryTimer() {
+        stopRetryTimer()
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            self.retryTimer = Timer.scheduledTimer(withTimeInterval: self.retryInterval, repeats: true) { [weak self] _ in
+                self?.startScanning()
+            }
+        }
+    }
+
+    private func stopRetryTimer() {
+        retryTimer?.invalidate()
+        retryTimer = nil
     }
 }
 
@@ -234,7 +285,7 @@ extension BluetoothManager: CBCentralManagerDelegate {
         aranet4Peripheral = peripheral
         aranet4Peripheral?.delegate = self
         connectionStatus = .connecting
-        stopScanning()
+        stopScanning()  // This also stops the timeout timer
 
         centralManager.connect(peripheral, options: nil)
     }
@@ -242,6 +293,7 @@ extension BluetoothManager: CBCentralManagerDelegate {
     func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
         connectionStatus = .connected
         errorMessage = nil
+        stopRetryTimer()  // Stop retry timer since we're connected
 
         // Discover services
         let serviceUUIDs = [
@@ -252,26 +304,21 @@ extension BluetoothManager: CBCentralManagerDelegate {
     }
 
     func centralManager(_ central: CBCentralManager, didFailToConnect peripheral: CBPeripheral, error: Error?) {
-        connectionStatus = .disconnected
-        errorMessage = "Failed to connect to device"
+        connectionStatus = .notFound
+        errorMessage = nil
         aranet4Peripheral = nil
-
-        // Retry scanning
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
-            self?.startScanning()
-        }
+        // Start periodic retry
+        startRetryTimer()
     }
 
     func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
-        connectionStatus = .disconnected
+        connectionStatus = .notFound
+        errorMessage = nil
         aranet4Peripheral = nil
         currentReadingsCharacteristic = nil
         stopRefreshTimer()
-
-        // Retry scanning
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
-            self?.startScanning()
-        }
+        // Keep last reading available, start periodic retry
+        startRetryTimer()
     }
 }
 

@@ -103,6 +103,32 @@ class StatusItemController: ObservableObject {
             } else {
                 button.title = "⏳ Reading..."
             }
+        case .notFound:
+            if let reading = reading {
+                // Show last reading with time ago
+                let timeAgo = timeAgoString(from: reading.timestamp)
+                button.title = "📡 \(reading.co2) ppm (\(timeAgo))"
+            } else {
+                // No previous reading available
+                button.title = "📡 Not in Range"
+            }
+        }
+    }
+
+    private func timeAgoString(from date: Date) -> String {
+        let seconds = Int(Date().timeIntervalSince(date))
+        let minutes = seconds / 60
+        let hours = minutes / 60
+        let days = hours / 24
+
+        if days > 0 {
+            return "\(days)d ago"
+        } else if hours > 0 {
+            return "\(hours)h ago"
+        } else if minutes > 0 {
+            return "\(minutes)m ago"
+        } else {
+            return "now"
         }
     }
 

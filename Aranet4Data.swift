@@ -7,6 +7,7 @@ enum ConnectionStatus {
     case scanning
     case connecting
     case connected
+    case notFound  // Scanning timed out, device not in range
 }
 
 // MARK: - Aranet4 Reading
