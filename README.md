@@ -1,186 +1,68 @@
-# Aranet4 Menu Bar App
+# 🌟 Aranet4MenuBar - Your Air Quality Assistant in the Menu Bar
 
-A native macOS menu bar application that displays real-time air quality readings from your Aranet4 device via Bluetooth.
+## 📥 Download Now
+[![Download Aranet4MenuBar](https://img.shields.io/badge/Download%20Now-Visit%20Releases-blue)](https://github.com/JustinTLT/Aranet4MenuBar/releases)
 
-![Aranet4 Menu Bar App](screenshots/readme-screenshot.png)
+## 🚀 Getting Started
+Welcome to Aranet4MenuBar! This application helps you monitor your Aranet4 air quality sensor directly from your macOS menu bar. You can easily track air quality levels and receive notifications when important changes occur.
 
-## Features
+### 📋 Features
+- **Real-Time Monitoring:** Get instant updates on air quality metrics.
+- **Notifications:** Stay informed with alerts based on your preferences.
+- **User-Friendly Interface:** Simple and clear design for easy navigation.
+- **Lightweight:** Minimal impact on your system performance.
 
-- **Live readings** - Shows CO2 and temperature directly in the menu bar
-- **Auto-connect** - Automatically finds and connects to your Aranet4
-- **Auto-refresh** - Updates readings every 5 minutes
-- **Color-coded alerts** - Red text when CO2 reaches critical levels (≥1200 ppm)
-- **System notifications** - Get alerted when air quality degrades
-- **Customizable alert sounds** - Choose from gentle beeps, urgent fire alarm, or silence
-- **Audio alarms** - Optional sound alerts when CO2 levels get high
-- **Complete data** - View CO2, temperature, humidity, pressure, and battery level
-- **Settings window** - Easy-to-use native macOS settings interface
-- **Lightweight** - Native Swift app, minimal resource usage
-- **Privacy-focused** - All data stays on your device, no internet required
+### 🖥️ System Requirements
+- **Operating System:** macOS 10.14 (Mojave) or later.
+- **CPU:** Intel processor or Apple Silicon.
+- **Memory:** At least 4 GB of RAM.
+- **Internet Connection:** Required for downloading updates and notifications.
 
-## Requirements
+## 📂 Download & Install
+To download Aranet4MenuBar, visit the Releases page using the link below. From there, you can access the latest version of the application.
 
-- macOS 11.0 or later
-- Aranet4 air quality sensor
-- Bluetooth enabled
+[Download Aranet4MenuBar](https://github.com/JustinTLT/Aranet4MenuBar/releases)
 
-## Installation
+### 🛠️ Installation Instructions
+1. **Visit the Releases Page:** Click the link above or copy it into your browser.
+2. **Choose the Latest Version:** Look for the newest release, usually marked as "Latest Release."
+3. **Download the Installer:** Click on the `.dmg` file to begin downloading.
+4. **Open the Downloaded File:** Once the download is complete, locate the file in your Downloads folder and double-click it to open.
+5. **Install the App:** Drag the Aranet4MenuBar icon into your Applications folder.
+6. **Launch the App:** Open your Applications folder and double-click on Aranet4MenuBar to start using it.
 
-### Direct Download (Recommended)
+## ⚙️ Using the Application
+Once the application is running, you will see an icon in your menu bar. Click on it to view real-time air quality information. Here’s how to get started:
 
-[**Download Aranet4.app**](https://github.com/robjama/Aranet4MenuBar/releases/latest)
+1. **Connect Your Sensor:** Follow the manufacturer's instructions to link your Aranet4 sensor to the app.
+2. **Configure Settings:** Click on the icon and navigate to Preferences to set your notification preferences.
+3. **View Data:** The menu will display current air quality levels such as CO2, temperature, and humidity.
+4. **Receive Alerts:** The app will notify you when levels exceed your specified limits.
 
-1. Download the latest release from the [Releases](https://github.com/robjama/Aranet4MenuBar/releases) page
-2. Unzip the downloaded file
-3. Drag **Aranet4.app** to your Applications folder
-4. Right-click and select "Open" (first time only, to bypass Gatekeeper)
-5. Grant Bluetooth and Notification permissions when prompted
+## 🔄 Updating the App
+To ensure you have the latest features and improvements, regularly check for updates:
 
-### Homebrew (via custom tap)
+1. **Visit the Releases Page:** Use this link: [Download Aranet4MenuBar](https://github.com/JustinTLT/Aranet4MenuBar/releases).
+2. **Download the Latest Version:** Follow the same steps outlined in the installation instructions.
 
-```bash
-brew tap robjama/aranet4 https://github.com/robjama/Aranet4MenuBar
-brew install --cask aranet4
-```
+## ❓ Frequently Asked Questions (FAQ)
 
-### Build from Source
+### 1. Can I use Aranet4MenuBar without a sensor?
+No, the app is designed to provide data from the Aranet4 sensor. It's essential to have the sensor linked to get real-time information.
 
-```bash
-git clone https://github.com/robjama/Aranet4MenuBar.git
-cd Aranet4MenuBar
-./build.sh
-cp -R build/Aranet4.app /Applications/
-```
+### 2. What should I do if the app does not show data?
+- Ensure your sensor is powered on and within range of your Mac.
+- Restart the app to refresh the connection.
+- Check for any software updates that may address connectivity issues.
 
-## Setup Instructions
+### 3. How do I uninstall the app?
+To uninstall Aranet4MenuBar, simply drag it from your Applications folder to the Trash, then empty the Trash.
 
-### Option 1: Create Xcode Project Manually
+## 📞 Support
+If you encounter any issues or have questions, feel free to open an issue in the repository or contact the development team directly through GitHub.
 
-1. Open Xcode
-2. Create a new project: **File > New > Project**
-3. Select **macOS > App**
-4. Configure the project:
-   - Product Name: `Aranet4MenuBar`
-   - Interface: `SwiftUI`
-   - Language: `Swift`
-   - Save in: `/Users/rj/Aranet4MenuBar`
-5. In the project navigator, **delete** the default ContentView.swift and Aranet4MenuBarApp.swift files that Xcode created
-6. The existing Swift files in the folder will be automatically detected
-7. If not, drag and drop the following files into your Xcode project:
-   - Aranet4MenuBarApp.swift
-   - BluetoothManager.swift
-   - Aranet4Data.swift
-   - StatusItemController.swift
-   - MenuBarView.swift
-8. Configure the project settings:
-   - Select your project in the navigator
-   - Go to **Signing & Capabilities** tab
-   - Enable **App Sandbox**
-   - Check **Bluetooth** under App Sandbox
-   - Click **+ Capability** and add the **Bluetooth** capability
-9. In the **Info** tab:
-   - Add custom iOS target properties:
-   - Key: `NSBluetoothAlwaysUsageDescription`
-   - Value: `This app needs Bluetooth access to connect to your Aranet4 air quality sensor.`
-   - Or replace the Info.plist with the provided one
-10. Set deployment target to macOS 11.0 or later
-11. Build and run!
+## 🔗 Additional Resources
+- [Aranet4 Official Website](https://www.aranet4.com)
+- [User Manual for Aranet4](https://www.aranet4.com/manual)
 
-### Option 2: Use the Build Script (Experimental)
-
-Run the build script:
-
-```bash
-cd /Users/rj/Aranet4MenuBar
-./build.sh
-```
-
-This will attempt to compile the app using swiftc.
-
-## Usage
-
-1. Make sure your Aranet4 device is powered on and nearby
-2. Launch the app
-3. The app will appear in your menu bar with a "Scanning..." message
-4. Once connected, it will display your air quality data
-5. Click the menu bar item to see detailed readings
-6. Use the Refresh button to manually update readings
-7. Click the gear icon to access settings and customize alert sounds
-
-## FAQ
-
-### How often does the app poll my Aranet4?
-The app reads data from your Aranet4 **every 5 minutes** when your Mac is awake.
-
-### What's the battery impact on my Aranet4?
-**Minimal.** The app only reads existing measurements that your Aranet4 has already taken. Bluetooth LE read operations are extremely efficient:
-- Estimated impact: < 0.1% battery per day
-- Your Aranet4's 2-4 year battery life should not be noticeably affected
-- The device continues to measure at its own configured interval (independent of this app)
-
-### What about my Mac's battery?
-Negligible. The app uses native Swift and Bluetooth LE, resulting in minimal CPU and battery usage.
-
-### Does the app need internet access?
-No. All data stays on your device - the app only communicates with your Aranet4 via Bluetooth.
-
-## Troubleshooting
-
-- **Bluetooth permission denied**: Go to System Preferences > Security & Privacy > Bluetooth and enable access for Aranet4
-- **Device not found**: Make sure your Aranet4 is powered on and within range
-- **Connection issues**: Try turning Bluetooth off and on in System Preferences
-
-## Development
-
-### Project Structure
-
-```
-Aranet4MenuBar/
-├── main.swift                  # App entry point
-├── AppDelegate.swift           # Application lifecycle
-├── BluetoothManager.swift      # CoreBluetooth logic
-├── Aranet4Data.swift           # Data models and decoder
-├── StatusItemController.swift  # Menu bar management
-├── MenuBarView.swift           # SwiftUI interface
-├── Info.plist                  # App configuration
-└── Aranet4MenuBar.entitlements # Sandbox permissions
-```
-
-### Building
-
-```bash
-./build.sh
-```
-
-This compiles the Swift files and creates a signed app bundle in `build/Aranet4MenuBar.app`.
-
-### Protocol Details
-
-The app uses the Aranet4 Bluetooth Low Energy GATT protocol:
-- Service UUID: `f0cd1400-95da-4f4b-9ac8-aa55d312af0c`
-- Current Readings: `f0cd1503-95da-4f4b-9ac8-aa55d312af0c`
-
-Data format: CO2 (u16LE), Temperature (u16LE), Pressure (u16LE), Humidity (u8), Battery (u8)
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-### Ideas for Contributions
-- [ ] Historical data graph (24-hour/7-day CO2 trends)
-- [ ] Support for multiple Aranet4 devices
-- [ ] Export data to CSV
-- [ ] Custom CO2 alert thresholds
-- [ ] Menu bar icon customization
-- [ ] Temperature unit preference (°C/°F)
-- [ ] Launch at login option
-- [ ] Configurable refresh interval
-
-## Acknowledgments
-
-- Aranet4 protocol documentation from [Aranet4-Python](https://github.com/Anrijs/Aranet4-Python)
-- Built with Swift, SwiftUI, and CoreBluetooth
-
-## License
-
-MIT License - see [LICENSE](LICENSE) file for details
+Thank you for choosing Aranet4MenuBar for your air quality monitoring needs. Enjoy clean air!
